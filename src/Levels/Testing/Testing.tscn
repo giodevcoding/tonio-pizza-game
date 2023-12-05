@@ -1,13 +1,21 @@
 [gd_scene load_steps=3 format=3 uid="uid://do2rodd1ludb0"]
 
-[ext_resource type="PackedScene" uid="uid://bfhwnb6ieya5r" path="res://src/Actors/Player/TPPlayer.tscn" id="1_bdune"]
+[ext_resource type="PackedScene" uid="uid://byqqs3mjd0ui0" path="res://src/Actors/Player/TPPlayer.tscn" id="1_bdune"]
 [ext_resource type="Texture2D" uid="uid://cr6tqc7a22btf" path="res://icon.svg" id="2_weibt"]
 
 [node name="Testing" type="Node2D"]
 
-[node name="TPPlayer" parent="." instance=ExtResource("1_bdune")]
-position = Vector2(639, 360)
+[node name="Test Object" type="StaticBody2D" parent="."]
+position = Vector2(343, 461)
+metadata/_edit_group_ = true
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(533, 445)
+[node name="Sprite2D" type="Sprite2D" parent="Test Object"]
 texture = ExtResource("2_weibt")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Test Object"]
+position = Vector2(9, 39)
+polygon = PackedVector2Array(-60, 25, -73, 12, -73, -90, -60, -103, 43, -103, 55, -90, 55, 12, 42, 25)
+
+[node name="TPPlayer" parent="." instance=ExtResource("1_bdune")]
+position = Vector2(450, 456)
+floor_constant_speed = false
