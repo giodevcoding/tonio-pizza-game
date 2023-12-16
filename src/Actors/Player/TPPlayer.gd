@@ -4,15 +4,16 @@ extends CharacterBody2D
 @export var speed = 200
 @export var sprint_multiplier = 1.4
 @export var sprint_animation_multiplier = 1.2
-@export var attack_cooldown_time = 0.3
+@export var attack_cooldown_time = 0.5
 
 var screen_size
 
 enum Direction { LEFT, RIGHT, DOWN, UP }
 var direction: Direction = Direction.DOWN
 
-var attack_timer = 0;
-var is_attacking: bool = false
+var last_attack_time = 0;
+var can_attack = true
+var is_attacking = false
 
 
 # Called when the node enters the scene tree for the first time.
@@ -27,10 +28,10 @@ func _process(delta):
 	handleMovement(delta)
 	handleDirection()
 	handleAnimation()
+	handleAttacking()
 
 func initAnimation():
-	if (!$AnimatedSprite2D.is_playing()):
-		$AnimatedSprite2D.play("idle")
+	$AnimationPlayer.play("idle-down")
 
 
 func handleMovement(delta):
@@ -45,12 +46,17 @@ func handleMovement(delta):
 	if (Input.is_action_pressed("move_right")):
 		currentVelocity.x += 1
 
-	if (velocity.length() > 0):
-		currentVelocity = currentVelocity.normalized() * speed
+	if (currentVelocity.length() > 0):
+		var movementSpeed = speed
+
+		if is_attacking:
+			movementSpeed = 10
+
+		currentVelocity = currentVelocity.normalized() * movementSpeed
 
 		if (Input.is_action_pressed("sprint")):
 			currentVelocity = currentVelocity * sprint_multiplier
-	
+
 	velocity = currentVelocity
 	
 	var motion = velocity * delta / 2
@@ -61,10 +67,10 @@ func handleMovement(delta):
 
 
 func handleAnimation():
-	if velocity.x == 0 && velocity.y == 0: 
+	if velocity.x == 0 && velocity.y == 0 && !is_attacking: 
 		handleIdleAnimation()	
 
-	if velocity.x != 0 || velocity.y != 0:
+	if (velocity.x != 0 || velocity.y != 0) && !is_attacking:
 		handleMoveAnimation()
 
 
@@ -85,36 +91,67 @@ func handleDirection():
 
 func handleIdleAnimation():
 	if (direction == Direction.DOWN):
-		$AnimatedSprite2D.animation = 'idle'
+		$AnimationPlayer.play('idle-down')
 
 	if (direction == Direction.LEFT || direction == Direction.RIGHT):
-		$AnimatedSprite2D.animation = 'idle-side'
+		$AnimationPlayer.play('idle-side')
 
 		if (direction == Direction.LEFT):
-			$AnimatedSprite2D.flip_h = true;
+			$Sprite2D.flip_h = true;
 		else:
-			$AnimatedSprite2D.flip_h = false;
+			$Sprite2D.flip_h = false;
 	
 	if (direction == Direction.UP):
-		$AnimatedSprite2D.animation = 'idle-up'
+		$AnimationPlayer.play('idle-up')
 
 
 func handleMoveAnimation():
 	if (direction == Direction.LEFT || direction == Direction.RIGHT):
-		$AnimatedSprite2D.animation = 'run-side'
+		$AnimationPlayer.play('run-side')
 
 		if (direction == Direction.LEFT):
-			$AnimatedSprite2D.flip_h = true;
+			$Sprite2D.flip_h = true;
 		else:
-			$AnimatedSprite2D.flip_h = false;
+			$Sprite2D.flip_h = false;
 
 	if (direction == Direction.DOWN):
-		$AnimatedSprite2D.animation = 'run-down'
+		$AnimationPlayer.play('run-down')
 
 	if (direction == Direction.UP):
-		$AnimatedSprite2D.animation = 'run-up'
+		$AnimationPlayer.play('run-up')
 
 	if (Input.is_action_pressed("sprint")):
-		$AnimatedSprite2D.speed_scale = sprint_animation_multiplier
+		$AnimationPlayer.set_speed_scale(sprint_animation_multiplier)
 	else:
-		$AnimatedSprite2D.speed_scale = 1
+		$AnimationPlayer.set_speed_scale(1)
+
+func handleAttacking():
+	if Time.get_ticks_msec() - last_attack_time > (attack_cooldown_time * 1000) && !can_attack:
+		can_attack = true
+
+	if can_attack && Input.is_action_pressed("attack"):
+		last_attack_time = Time.get_ticks_msec()
+		can_attack = false
+		is_attacking = true
+		attack()
+
+func attack():
+	$AnimationPlayer.stop()
+	if (direction == Direction.LEFT || direction == Direction.RIGHT):
+		$AnimationPlayer.play('attack-side')
+
+		if (direction == Direction.LEFT):
+			$Sprite2D.flip_h = true;
+		else:
+			$Sprite2D.flip_h = false;
+
+	if (direction == Direction.DOWN):
+		$AnimationPlayer.play('attack-down')
+
+	if (direction == Direction.UP):
+		$AnimationPlayer.play('attack-up')
+
+
+func _on_animation_player_animation_finished(anim_name):
+	if "attack" in anim_name:
+		is_attacking = false;

@@ -389,6 +389,6 @@ animations = [{
 [node name="PlayerAnimatedSprite2D" type="AnimatedSprite2D"]
 texture_filter = 1
 sprite_frames = SubResource("SpriteFrames_g87an")
-animation = &"attack-down"
-frame = 3
-frame_progress = 1.0
+animation = &"idle"
+frame = 2
+frame_progress = 0.600473

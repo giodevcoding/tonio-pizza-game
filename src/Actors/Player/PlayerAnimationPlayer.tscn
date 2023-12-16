@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://cpikju5lvrewa"]
+
+[sub_resource type="Animation" id="Animation_e8mcw"]
+resource_name = "idle"
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_fv87h"]
+_data = {
+"idle": SubResource("Animation_e8mcw")
+}
+
+[node name="PlayerAnimationPlayer" type="AnimationPlayer"]
+libraries = {
+"": SubResource("AnimationLibrary_fv87h")
+}
